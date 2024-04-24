@@ -23,13 +23,13 @@ public class Fraction implements Fractionable {
     @Cache
     public double doubleValue() {
         System.out.println("invoke double value");
-        return (double) num/denum;
+        return (double) num / denum;
     }
 
     @Override
     @Cache
     public double multiValue() {
         System.out.println("invoke multi double value");
-        return (double) num*denum;
+        return (double) num * denum;
     }
 }
