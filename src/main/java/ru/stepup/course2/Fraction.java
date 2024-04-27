@@ -29,7 +29,7 @@ public class Fraction implements Fractionable {
     @Override
     @Cache(1000)
     public double multiValue() {
-        System.out.println("invoke multi double value");
+        System.out.println("invoke multi value");
         return (double) num*denum;
     }
 }

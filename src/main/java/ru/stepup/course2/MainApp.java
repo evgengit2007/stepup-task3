@@ -6,16 +6,27 @@ public class MainApp {
         Fractionable num = Utils.cache(fr);
         num.doubleValue(); // sout сработал
         num.doubleValue(); // sout молчит
-        num.doubleValue(); // sout молчит
-        num.multiValue(); // sout сработал на multi
-        num.multiValue(); // sout молчит на multi
-        num.doubleValue(); // sout молчит
+        num.multiValue(); // sout сработал
+        num.multiValue(); // sout молчит
+        System.out.println("set num = 5");
+        System.out.println("set denum = 20");
         num.setNum(5);
-        System.out.println("поменяли значение num");
+        num.setDenum(20);
         num.doubleValue(); // sout сработал
         num.doubleValue(); // sout молчит
-        num.multiValue(); // sout сработал на multi
-        num.multiValue(); // sout молчит на multi
+        num.multiValue(); // sout сработал
+        num.multiValue(); // sout молчит
+        System.out.println("set num = 1");
+        num.setNum(1);
+        num.doubleValue(); // sout сработал
         num.doubleValue(); // sout молчит
+        num.multiValue(); // sout сработал
+        num.multiValue(); // sout молчит
+        System.out.println("set num = 5");
+        num.setNum(5);
+        num.doubleValue(); // sout сработал
+        num.doubleValue(); // sout молчит
+        num.multiValue(); // sout сработал
+        num.multiValue(); // sout молчит
     }
 }
