@@ -21,7 +21,6 @@ public class FractionInvocationHandler<T> implements InvocationHandler {
 
     public void hashClear() {
         paramHash.clear();
-        System.out.println("hashClear");
     }
 
     @Override

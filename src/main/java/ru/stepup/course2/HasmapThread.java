@@ -34,14 +34,11 @@ public class HasmapThread<T> implements Runnable {
 
     @Override
     public void run() {
-        Object result = null;
+        Object result;
         try {
             hashMap = getHashMap();
             if (hashMap.containsKey(keyParam)) {
-                result = hashMap.get(keyParam);
-            }
-            if (result != null) {
-                this.result = result;
+                this.result = hashMap.get(keyParam);
             } else {
                 result = keyMethod.invoke(object, args);
                 hashMap.put(keyParam, result);
