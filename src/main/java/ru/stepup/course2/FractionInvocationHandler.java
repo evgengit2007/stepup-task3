@@ -1,6 +1,5 @@
 package ru.stepup.course2;
 
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -8,72 +7,65 @@ import java.util.HashMap;
 
 public class FractionInvocationHandler<T> implements InvocationHandler {
     static SingleThread singleThread;
+    static HasmapThread hashmapThread;
     private T object;
 
-    private HashMap<String, Object> paramHash = new HashMap<>();
+    private volatile HashMap<String, Object> paramHash = new HashMap<>();
 
-    private Thread th1;
+    private Thread thCache;
+    private Thread thHash;
 
     public FractionInvocationHandler(T object) {
         this.object = object;
     }
 
+    public void hashClear() {
+        paramHash.clear();
+        System.out.println("hashClear");
+    }
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Object result;
+        Object result = null;
         String keyParam = ";";
         Method keyMethod = object.getClass().getMethod(method.getName(), method.getParameterTypes());
-//        System.out.println("-----------------------");
-//        System.out.println(keyMethod.getName());
         if (keyMethod.isAnnotationPresent(Mutator.class)) {
             return keyMethod.invoke(object, args);
         }
         if (keyMethod.isAnnotationPresent(Cache.class)) {
             Cache ch = keyMethod.getAnnotation(Cache.class); // так получить параметр из кеша
-            System.out.println("parameter cache: " + ch.value()); // так получить параметр из кеша
-            if (th1 == null) {
-                Runnable st1 = () -> {
-                    while (!Thread.interrupted()) { // Thread.interrupted() прерывание потока извне
-                        try {
-                            System.out.println("!!!!!!!");
-                            Thread.sleep(ch.value());
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        System.out.println("11111111");
-                        paramHash.clear();
-                        return;
-                    }
-                };
-                th1 = new Thread(st1);
-                th1.start();
-                System.out.println(th1.toString());
+            if (thCache == null) {
+                singleThread = new SingleThread(this, ch.value(), paramHash);
+                thCache = new Thread(singleThread);
+                thCache.start();
+            } else {
+                if (thCache.isAlive()) {
+                    thCache.interrupt();
+                }
+                singleThread = new SingleThread(this, ch.value(), paramHash);
+                thCache = new Thread(singleThread);
+                thCache.start();
             }
-/*
-            if (th1 == null) {
-                singleThread = new SingleThread(ch.value());
-                th1 = new Thread(singleThread);
-                th1.start();
-            }
-*/
             keyParam = keyParam + keyMethod.getName() + ";";
-            // Получить имя и значение всех полей
-            Field[] field = object.getClass().getDeclaredFields();
-            for (Field f : field) {
-                f.setAccessible(true);
-//                System.out.println(f.getName() + "=" + f.get(object));
-                keyParam = keyParam + f.getName() + "=" + f.get(object) + ";";
-            }
-//            System.out.println("keyParam: " + keyParam);
-            if (paramHash.containsKey(keyParam)) {
-                result = paramHash.get(keyParam);
-                System.out.println("cache result = " + result);
+            // Получить имя и значение полей doubleValue
+            // ключ строка вида: ;doubleValue;num=5;denum=2;
+            Field fieldNum = object.getClass().getDeclaredField("num");
+            fieldNum.setAccessible(true);
+            keyParam = keyParam + "num" + "=" + fieldNum.get(object) + ";";
+            Field fieldDenum = object.getClass().getDeclaredField("denum");
+            fieldDenum.setAccessible(true);
+            keyParam = keyParam + "denum" + "=" + fieldDenum.get(object) + ";";
+            hashmapThread = new HasmapThread<Object>(object, keyMethod, keyParam, paramHash, args, result);
+            thHash = new Thread(hashmapThread);
+            thHash.start();
+            // последовательное выполнение потоков, в этом случае более логично код потока вынести в тело метода
+            thHash.join();
+            paramHash = hashmapThread.getHashMap();
+            result = hashmapThread.getResult();
+            if (result != null) {
+                System.out.println("result = " + result);
                 return result;
             }
-            result = keyMethod.invoke(object, args);
-            paramHash.put(keyParam, result);
-            System.out.println("calculate result = " + result);
-            return result;
         }
         return keyMethod.invoke(object, args);
     }

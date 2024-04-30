@@ -4,23 +4,29 @@ import java.util.HashMap;
 
 public class SingleThread implements Runnable {
 
+    FractionInvocationHandler fractionInvocationHandler;
+
+    private Object object;
     private int cacheValue;
 
-    public SingleThread(int cacheValue) {
+    private HashMap<String, Object> hashMap;
+
+    public SingleThread(Object object, int cacheValue, HashMap<String, Object> hashMap) {
+        this.object = object;
         this.cacheValue = cacheValue;
+        this.hashMap = new HashMap<>(hashMap);
     }
 
     @Override
     public void run() {
         while (!Thread.interrupted()) { // Thread.interrupted() прерывание потока извне
             try {
-                System.out.println("!!!!!!!");
                 Thread.sleep(cacheValue);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                return;
             }
-            System.out.println("11111111");
-//            paramHash.clear();
+            fractionInvocationHandler = (FractionInvocationHandler) object;
+            fractionInvocationHandler.hashClear();
             return;
         }
     }

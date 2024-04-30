@@ -4,51 +4,52 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+/*
+список тестов:
+1. Проверить попадание в историю кеша значений и вывод значения из кеша
+2. Проверить работу кеширования до истечения времени жизни в кеше (кеш не должен обнуляться)
+3. Проверить работу кеширования после истечения времени жизни в кеше (кеш должен обнулиться)
+
+*/
 public class JunitTest {
     @Test
-    @DisplayName("test Mutator")
+    @DisplayName("test history cache")
     public void test_1() {
-        FractionJunit fr = new FractionJunit(1,2);
+        FractionTest fr = new FractionTest(1, 2);
         Fractionable num = Utils.cache(fr);
         num.doubleValue(); // sout сработал
-        num.doubleValue(); // sout молчит
-        num.setNum(2);
-        num.doubleValue(); // sout молчит
-        Assertions.assertEquals(fr.countStartDouble, 2
-        );
+        num.setNum(5);
+        num.doubleValue(); // sout сработал
+        num.setNum(1); // вернули прежнее значение
+        num.doubleValue(); // sout молчит, значение взяли из кеша
+        Assertions.assertEquals(fr.count, 2);
     }
 
     @Test
-    public void testUtils() {
-        // Fractionable корректно
-        Fraction fr = new Fraction(1, 2);
-        Assertions.assertDoesNotThrow(() -> (Fractionable) Utils.cache(fr));
-    }
-
-    @Test
-    public void testFractionInvocationHandler() {
-        // FractionInvocationHandler корректно
-        Fraction fr = new Fraction(1, 2);
-        Assertions.assertDoesNotThrow(() -> new FractionInvocationHandler(fr));
-    }
-
-    @Test
-    public void testInvokeMethod() {
-        FractionJunit fr = new FractionJunit(1, 2);
+    @DisplayName("test time live in cache")
+    public void test_2() throws Exception {
+        FractionTest fr = new FractionTest(1, 2);
         Fractionable num = Utils.cache(fr);
-        // первый вызов doubleValue
-        num.doubleValue();
-        System.out.println("fr.countStartDouble = " + fr.countStartDouble);
-        // повторный вызов doubleValue будет из кэша
-        num.doubleValue();
-        System.out.println("fr.countStartDouble = " + fr.countStartDouble);
-        Assertions.assertEquals(1, fr.countStartDouble);
+        num.doubleValue(); // sout сработал
+        num.setNum(5);
+        num.doubleValue(); // sout сработал
+        Thread.sleep(500); // заснуть на 0.5 сек
+        num.setNum(1); // вернули прежнее значение
+        num.doubleValue(); // sout молчит, значение взяли из кеша
+        Assertions.assertEquals(fr.count, 2);
     }
 
     @Test
-    public void testMainApp() {
-        // проверка запускающего модуля MainApp
-        String[] str = null;
-        Assertions.assertDoesNotThrow(() -> MainApp.main(str));
+    @DisplayName("test time live expiried in cache")
+    public void test_3() throws Exception {
+        FractionTest fr = new FractionTest(1, 2);
+        Fractionable num = Utils.cache(fr);
+        num.doubleValue(); // sout сработал
+        num.setNum(5);
+        num.doubleValue(); // sout сработал
+        Thread.sleep(1500); // заснуть на 1.5 сек
+        num.setNum(1); // вернули прежнее значение
+        num.doubleValue(); // sout сработал
+        Assertions.assertEquals(fr.count, 3);
     }
 }
