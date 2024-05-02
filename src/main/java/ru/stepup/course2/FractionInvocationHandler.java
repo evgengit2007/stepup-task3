@@ -48,12 +48,19 @@ public class FractionInvocationHandler<T> implements InvocationHandler {
             keyParam = keyParam + keyMethod.getName() + ";";
             // Получить имя и значение полей doubleValue
             // ключ строка вида: ;doubleValue;num=5;denum=2;
+/*
             Field fieldNum = object.getClass().getDeclaredField("num");
             fieldNum.setAccessible(true);
             keyParam = keyParam + "num" + "=" + fieldNum.get(object) + ";";
             Field fieldDenum = object.getClass().getDeclaredField("denum");
             fieldDenum.setAccessible(true);
             keyParam = keyParam + "denum" + "=" + fieldDenum.get(object) + ";";
+*/
+            Field[] field = object.getClass().getDeclaredFields();
+            for (Field f : field) {
+                f.setAccessible(true);
+                keyParam = keyParam + f.getName() + "=" + f.get(object) + ";";
+            }
             hashmapThread = new HasmapThread<Object>(object, keyMethod, keyParam, paramHash, args, result);
             thHash = new Thread(hashmapThread);
             thHash.start();
