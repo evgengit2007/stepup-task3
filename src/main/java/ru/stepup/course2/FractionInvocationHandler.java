@@ -22,37 +22,6 @@ public class FractionInvocationHandler<T> implements InvocationHandler {
 
     public FractionInvocationHandler(T object) {
         this.object = object;
-//        Field[] field = object.getClass().getDeclaredFields();
-//        for (Field f : field) {
-//            f.setAccessible(true);
-//            try {
-//                System.out.println(f.get(object));
-//            } catch (IllegalAccessException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//        stateObj = new StateObj();
-//        Method[] method = object.getClass().getMethods();
-//        for (Method m : method) {
-//            System.out.println(m.getAnnotation(Mutator.class));
-//            if (m.isAnnotationPresent(Mutator.class)) {
-//                System.out.println(m.getName());
-//                try {
-//                    Field f = object.getClass().getField("num");
-//                    f.setAccessible(true);
-//                    System.out.println(f);
-//                } catch (NoSuchFieldException e) {
-//                    throw new RuntimeException(e);
-//                }
-//                stateObj = new StateObj(stateObj, m, List.of(1).toArray());
-//            }
-//            mapState.put(stateObj, new HashMap<>());
-//        }
-//        stateObj = new StateObj();
-//        mapRes = new HashMap<>();
-//        Method[] met = object.getClass().getMethods();
-//        mapRes.put()
-//        mapState.put(stateObj, mapRes);
     }
 
     @Override
@@ -65,22 +34,14 @@ public class FractionInvocationHandler<T> implements InvocationHandler {
         }
         if (keyMethod.isAnnotationPresent(Mutator.class)) {
             stateObj = new StateObj(stateObj, method, args);
-//            System.out.println("1 " + stateObj.getMapValues());
             Set<StateObj> keys = mapState.keySet();
-//            for (StateObj st : keys) {
-//                System.out.println("2 " + mapState);
-//                mapState.remove(st);
-//                System.out.println("22 " + mapState);
-//            }
             if (!mapState.containsKey(stateObj)) {
                 mapState.put(stateObj, new ConcurrentHashMap<>());
-//                System.out.println("3 " + mapState.get(stateObj));
             }
             return keyMethod.invoke(object, args);
         }
         if (keyMethod.isAnnotationPresent(Cache.class)) {
             Cache ch = keyMethod.getAnnotation(Cache.class); // получить параметр из кеша
-//            System.out.println("mapState = " + mapState);
             if (thCache == null) {
                 periodCheckEvent = ch.periodCheck();
                 singleThreadExt = new SingleThreadExt();
@@ -105,21 +66,18 @@ public class FractionInvocationHandler<T> implements InvocationHandler {
                 if (res != null) {
                     mapRes.put(method, result);
                     mapState.put(stateObj, mapRes);
-//                    System.out.println("res 70 = " + res);
                     return res;
                 }
                 res = keyMethod.invoke(object, args);
                 result.setRes(res);
                 mapRes.put(method, result);
                 mapState.put(stateObj, mapRes);
-//                System.out.println("res 77 = " + res);
                 return res;
             }
             res = keyMethod.invoke(object, args);
             Result result = new Result(System.currentTimeMillis() + ch.value(), res);
             mapRes.put(method, result);
             mapState.put(stateObj, mapRes);
-//            System.out.println("res 84 = " + res);
             return res;
         }
         return keyMethod.invoke(object, args);
@@ -130,7 +88,6 @@ public class FractionInvocationHandler<T> implements InvocationHandler {
 
         @Override
         public void run() {
-//            System.out.println("SingleThread, start");
             while (true) {
                 try {
                     Thread.sleep(100);
@@ -145,9 +102,6 @@ public class FractionInvocationHandler<T> implements InvocationHandler {
         }
 
         void processEvent() {
-//            System.out.println("SingleThread, start clear cache");
-//            System.out.println("SingleThread, mapState = " + mapState);
-//            System.out.println("SingleThread, current time = " + System.currentTimeMillis());
             Result result;
             ConcurrentHashMap<StateObj, ConcurrentHashMap<Method, Result>> mapStateClear = new ConcurrentHashMap<>(mapState); // делаем копию текущей мапы для последующей очистки
             ConcurrentHashMap<StateObj, ConcurrentHashMap<Method, Result>> mapStateNew = new ConcurrentHashMap<>(); // делаем чистую мапу, куда будем писать новые значения
@@ -174,7 +128,6 @@ public class FractionInvocationHandler<T> implements InvocationHandler {
             mapStateAggr.putAll(mapStateClear);
             mapState = mapStateAggr;
             eventNotify = System.currentTimeMillis();
-//            System.out.println("SingleThread end, mapState = " + mapState);
         }
     }
 }

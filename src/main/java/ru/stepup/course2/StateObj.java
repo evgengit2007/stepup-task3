@@ -18,7 +18,7 @@ public class StateObj {
     public StateObj() {
     }
 
-    // используется только для отладки
+    // используется для отладки
     public Map<Method, List<Object>> getMapValues() {
         return mapValues;
     }

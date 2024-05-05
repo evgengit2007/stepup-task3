@@ -1,6 +1,7 @@
 package ru.stepup.course2;
 
 public class FractionTest implements Fractionable {
+    // класс, созданный для проведения тестов
     private int num;
     private int denum;
     public int count = 0;

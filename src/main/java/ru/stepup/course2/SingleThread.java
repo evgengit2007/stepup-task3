@@ -35,9 +35,6 @@ public class SingleThread implements Runnable {
     }
 
     void processEvent() {
-//            System.out.println("SingleThread, start clear cache");
-//            System.out.println("SingleThread, mapState = " + mapState);
-//            System.out.println("SingleThread, current time = " + System.currentTimeMillis());
         Result result;
         ConcurrentHashMap<StateObj, ConcurrentHashMap<Method, Result>> mapStateClear = new ConcurrentHashMap<>(mapState); // делаем копию текущей мапы для последующей очистки
         ConcurrentHashMap<StateObj, ConcurrentHashMap<Method, Result>> mapStateNew = new ConcurrentHashMap<>(); // делаем чистую мапу, куда будем писать новые значения
@@ -64,6 +61,5 @@ public class SingleThread implements Runnable {
         mapStateAggr.putAll(mapStateClear);
         mapState = mapStateAggr;
         eventNotify = System.currentTimeMillis();
-//            System.out.println("SingleThread end, mapState = " + mapState);
     }
 }
