@@ -20,9 +20,11 @@ public class JunitTest {
         num.doubleValue(); // sout сработал
         num.setNum(5);
         num.doubleValue(); // sout сработал
-        num.setNum(1); // вернули прежнее значение
+        num.setNum(1); // вернули прежнее значение, но sout сработает, т.к. в кеше ключа объекта еще нет такой записи (конструктор заносит пустышки)
+        num.doubleValue(); // sout сработал
+        num.setNum(5);
         num.doubleValue(); // sout молчит, значение взяли из кеша
-        Assertions.assertEquals(fr.count, 2);
+        Assertions.assertEquals(3, fr.count);
     }
 
     @Test
@@ -33,23 +35,35 @@ public class JunitTest {
         num.doubleValue(); // sout сработал
         num.setNum(5);
         num.doubleValue(); // sout сработал
+        num.setNum(1); // вернули прежнее значение, но sout сработает, т.к. в кеше ключа объекта еще нет такой записи (конструктор заносит пустышки)
+        num.doubleValue(); // sout сработал, время жизни еще не вышло
         Thread.sleep(500); // заснуть на 0.5 сек
-        num.setNum(1); // вернули прежнее значение
+        num.setNum(5);
         num.doubleValue(); // sout молчит, значение взяли из кеша
-        Assertions.assertEquals(fr.count, 2);
+        Assertions.assertEquals(3, fr.count);
     }
 
     @Test
-    @DisplayName("test time live expiried in cache")
+    @DisplayName("test SimpleThread clearing cache")
     public void test_3() throws Exception {
+        int count = 0;
         FractionTest fr = new FractionTest(1, 2);
         Fractionable num = Utils.cache(fr);
+        num.setNum(1);
+        num.setDenum(2);
         num.doubleValue(); // sout сработал
-        num.setNum(5);
+        count++;
+        for (int i = 0; i < 9; i++) {
+            num.setNum(2 + i);
+            num.doubleValue(); // sout сработал
+            count++;
+        }
+        // закончили добавлять уникальные значения в кеш
+        Thread.sleep(1500); // заснуть на 1.5 сек ждем очистки кеша отдельным потоком
+        System.out.println("-------------");
+        num.setNum(1); // вернули прежнее значение, что было до очистки
         num.doubleValue(); // sout сработал
-        Thread.sleep(1500); // заснуть на 1.5 сек
-        num.setNum(1); // вернули прежнее значение
-        num.doubleValue(); // sout сработал
-        Assertions.assertEquals(fr.count, 3);
+        count++;
+        Assertions.assertEquals(count, fr.count);
     }
 }

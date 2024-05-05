@@ -1,33 +1,51 @@
 package ru.stepup.course2;
 
+/*
+    Мапа 1: (главная). ключ - объект класса StateObj, состоящий из мапы: метод, вызванный в аннотации Mutator,
+    значение - переданный аргумент значение для изменения.
+    Значение: мапа 2.
+    Мапа 2: ключ - метод, помеченный  аннотацией Cache, значение - отдельный класс Result, содержит время создания, результат вычисления.
+    Описание работы:
+    Особенность, которую не удалось решить: первоначальный вызов конструктора с параметрами запишет в объект-ключ кеша
+    пустые значения параметров (но результат будет подсчитан корректно). Если потом через сеттеры будут установлены
+    эти же значения, то через прокси будут переданы уже не пустые параметры и это будет новое значение объект-ключа, следовательно
+    произойдет вызов метода.
+    Решение как вариант: в запускающем классе сразу после вызова конструктора и прокси вызывать сеттеры по обоим полям.
+    1) При вызове метода, помеченного как мутатор, происходит запись мапы и сохранение как объекта StateObj. Это будет
+    ключ для Мапы 1. Если объекта с такими параметрами нет, создается новый объект.
+    2) При вызове метода, помеченного как Cache, проверяется наличие дополнительного потока SimpleThread, если его нет,
+    то он создается. Переменная eventNotify получает значение системного времени, которая в бесконечном цикле сравнивается как:
+    System.currentTimeMillis() - eventNotify < periodCheckEvent
+    При невыполнении данного условия запускается очистка кеша.
+    Мапы реализованы через потоконезависимую ConcurrentHashMap
+*/
+
 public class MainApp {
     public static void main(String[] args) throws Exception {
         Fraction fr = new Fraction(1, 2);
         System.out.println("num = 1, denum = 2");
         Fractionable num = Utils.cache(fr);
-        num.doubleValue(); // sout сработал
-        num.doubleValue(); // sout молчит
-        num.multiValue(); // sout сработал
-        num.multiValue(); // sout молчит
-        System.out.println("set num = 5");
-        num.setNum(5);
-        num.doubleValue(); // sout сработал
-        num.doubleValue(); // sout молчит
-        num.multiValue(); // sout сработал
-        num.multiValue(); // sout молчит
-        System.out.println("set num = 1, sleep 500");
-        Thread.sleep(500);
         num.setNum(1);
+        num.setDenum(2);
         num.doubleValue(); // sout сработал
-        num.doubleValue(); // sout молчит
-        num.multiValue(); // sout сработал
-        num.multiValue(); // sout молчит
-        System.out.println("set num = 5, sleep 1500");
-        num.setNum(5);
+        Thread.sleep(500);
+        for (int i = 0; i < 3; i++) {
+            num.setNum(2 + i);
+            num.doubleValue(); // sout сработал
+            num.doubleValue(); // sout молчит
+        }
+        Thread.sleep(500);
+        for (int i = 0; i < 3; i++) {
+            num.setDenum(3 + i);
+            num.doubleValue(); // sout сработал
+            num.doubleValue(); // sout молчит
+        }
+        Thread.sleep(500);
+        num.setNum(2);
+        num.setDenum(2);
+        num.doubleValue(); // sout молчит, время жизни не вышло
+        System.out.println("------------------");
         Thread.sleep(1500);
-        num.doubleValue(); // sout сработал
-        num.doubleValue(); // sout молчит
-        num.multiValue(); // sout сработал
-        num.multiValue(); // sout молчит
+        num.doubleValue(); // sout сработал, время жизни вышло
     }
 }

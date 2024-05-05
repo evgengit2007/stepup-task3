@@ -8,5 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Cache {
-    int value() default 0;
+    long value() default 0;
+    // счетчик количества записей в кеше, после превышения которого запускается очистка
+    int periodCheck() default 1000;
 }

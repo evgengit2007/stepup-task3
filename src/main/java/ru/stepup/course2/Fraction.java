@@ -20,14 +20,14 @@ public class Fraction implements Fractionable {
     }
 
     @Override
-    @Cache(1000)
+    @Cache(value = 1000L, periodCheck = 1000)
     public double doubleValue() {
         System.out.println("invoke double value");
         return (double) num / denum;
     }
 
     @Override
-    @Cache(1000)
+    @Cache(1000L)
     public double multiValue() {
         System.out.println("invoke multi value");
         return (double) num * denum;

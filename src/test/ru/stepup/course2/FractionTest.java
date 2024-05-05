@@ -21,7 +21,7 @@ public class FractionTest implements Fractionable {
     }
 
     @Override
-    @Cache(1000)
+    @Cache(1000L)
     public double doubleValue() {
         System.out.println("invoke double value");
         count++;
@@ -29,7 +29,7 @@ public class FractionTest implements Fractionable {
     }
 
     @Override
-    @Cache(1000)
+    @Cache(1000L)
     public double multiValue() {
         System.out.println("invoke multi value");
         count++;
